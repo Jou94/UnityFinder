@@ -5,6 +5,7 @@ using UnityEngine;
 public class MapGenerator : MonoBehaviour {
 
 	public Transform tilePrefab;
+	public Transform roughTerrainTile;
 	//public Transform black_background;
 	public Vector2 mapSize;
 
@@ -31,12 +32,22 @@ public class MapGenerator : MonoBehaviour {
 
 		for (int x = 0; x < mapSize.x; x++) {
 			for (int y = 0; y < mapSize.y; y++) {
+
+				//Basic Terrain
 				Vector3 tilePosition = new Vector3(-mapSize.x/2 + 0.5f + x, 0, -mapSize.y/2 + 0.5f + y);
 				Transform newTile = Instantiate(tilePrefab, tilePosition, Quaternion.Euler(Vector3.right*90)) as Transform;
-				newTile.localScale = Vector3.one * (1-outlinePercent);
+				newTile.localScale = new Vector3(5,5,5) * (1-outlinePercent);
 				newTile.parent = mapHolder;
+
+
+				//Rough Terrain
+				if (Random.value <0.25f) {
+					tilePosition = new Vector3(-mapSize.x/2 + 0.5f + x, 0.1f, -mapSize.y/2 + 0.5f + y);
+					newTile = Instantiate(roughTerrainTile, tilePosition, Quaternion.Euler(Vector3.right*90)) as Transform;
+					newTile.localScale = new Vector3(5,5,5) * (1-outlinePercent);
+					newTile.parent = mapHolder;
+				}	
 			}
 		}
-
 	}
 }
