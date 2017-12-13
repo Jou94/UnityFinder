@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+
 public class MapGenerator : MonoBehaviour {
 
 	public Transform Dirt1Tile;
 	public Transform DirtPlants1Tile;
 	public Transform DirtRock1Tile;
 	public Vector2 mapSize;
+	
 
 	[Range(0,1)]
 	public float outlinePercent;
@@ -23,6 +26,8 @@ public class MapGenerator : MonoBehaviour {
 	Queue<Coord> shuffledTileCoords;
 
 	Coord playerPosition;
+
+	TileClass tileclass;
 
 	void Start() {
 		GenerateMap();
@@ -55,10 +60,8 @@ public class MapGenerator : MonoBehaviour {
 		mapHolder.parent = transform;
 
 		
-		
+		GameObject[,] map = new GameObject[(int)mapSize.x,(int)mapSize.y]; 
 
-
-		
 		playerPosition = GetRandomCoord();
 		Debug.Log(string.Format("The random coord is {0},{1}", playerPosition.x+1,playerPosition.y+1));
 
@@ -70,17 +73,30 @@ public class MapGenerator : MonoBehaviour {
 				//Rough Terrain
 				if (Random.value < roughTerrainPercent) {
 					
-					Transform newTile = Instantiate(DirtPlants1Tile, tilePosition, Quaternion.Euler(Vector3.right*90)) as Transform;
+					Transform newTile = (Transform)Instantiate(DirtPlants1Tile, tilePosition, Quaternion.Euler(Vector3.right*90));
 					newTile.localScale = new Vector3(5,5,5) * (1-outlinePercent);
 					newTile.parent = mapHolder;
+					GameObject tile = newTile.gameObject;
+					map[x,y] = tile;
+					tileclass = map[x,y].GetComponent<TileClass>();
+					tileclass.setType(1);
+					tileclass.setPos(tilePosition);
+					//Debug.Log(tileclass.getPos());
+
 				}
 
 				//Basic Terrain
 				else {
 					
-					Transform newTile = Instantiate(Dirt1Tile, tilePosition, Quaternion.Euler(Vector3.right*90)) as Transform;
+					Transform newTile = (Transform)Instantiate(Dirt1Tile, tilePosition, Quaternion.Euler(Vector3.right*90));
 					newTile.localScale = new Vector3(5,5,5) * (1-outlinePercent);
 					newTile.parent = mapHolder;
+					GameObject tile = newTile.gameObject;
+					map[x,y] = tile;
+					tileclass = map[x,y].GetComponent<TileClass>();
+					tileclass.setType(0);
+					tileclass.setPos(tilePosition);
+					//Debug.Log(tileclass.getType());
 
 				}
 
@@ -105,9 +121,15 @@ public class MapGenerator : MonoBehaviour {
 				Vector3 wallPosition = CoordToPosition(randomCoord.x, randomCoord.y);
 				wallPosition = wallPosition + new Vector3 (0,0.001f,0);
 
-				Transform newTile = Instantiate(DirtRock1Tile, wallPosition, Quaternion.Euler(Vector3.right*90)) as Transform;
+				Transform newTile = (Transform)Instantiate(DirtRock1Tile, wallPosition, Quaternion.Euler(Vector3.right*90));
 				newTile.localScale = new Vector3(5,5,5) * (1-outlinePercent);
 				newTile.parent = mapHolder;
+				GameObject tile = newTile.gameObject;
+				map[randomCoord.x,randomCoord.y] = tile;
+				tileclass = tile.GetComponent<TileClass>();
+				tileclass.setType(2);
+				tileclass.setPos(wallPosition);
+				//Debug.Log(tileclass.coverType);
 				wallMap[randomCoord.x, randomCoord.y] = true;
 			}
 			else {

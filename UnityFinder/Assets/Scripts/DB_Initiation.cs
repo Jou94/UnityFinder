@@ -11,7 +11,7 @@ public class DB_Initiation : MonoBehaviour {
         string __DBName = "URI=file:PathDB.db";
         IDbConnection _connection = new SqliteConnection(__DBName);
         IDbCommand _command = _connection.CreateCommand();
-        string sql;
+        //string sql;
 
         _connection.Open();
 
