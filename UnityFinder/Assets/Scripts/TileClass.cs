@@ -18,11 +18,11 @@ public class TileClass : MonoBehaviour {
 		//coverType = cover;
 	//}
 
-	public int getType() {return coverType;}
+	public int getType() {return type;}
 
 	public Vector3 getPos() {return pos;}
 
-	public void setType(int type){coverType = type;}
+	public void setType(int Ctype){type = Ctype;}
 
 	public void setPos(Vector3 position){pos = position;}
 

@@ -10,6 +10,9 @@ public class MapGenerator : MonoBehaviour {
 	public Transform DirtPlants1Tile;
 	public Transform DirtRock1Tile;
 	public Vector2 mapSize;
+	public Transform Cursor;
+	public Transform Player1;
+	public Transform Enemy1;
 	
 
 	[Range(0,1)]
@@ -25,18 +28,29 @@ public class MapGenerator : MonoBehaviour {
 
 	Queue<Coord> shuffledTileCoords;
 
-	Coord playerPosition;
-
 	TileClass tileclass;
+
+	GameObject[,] map;
+
+	Coord cursorPosition;
+	Coord playerPosition;
+	Coord enemyPosition;
 
 	void Start() {
 		GenerateMap();
-		//InstantiatePlayers();
-		//InstantiateEnemies();
-		//InstantiateCursor();
+		InstantiatePlayers();
+		InstantiateEnemies();
+		InstantiateCursor();
 	}
 
 	public void GenerateMap() {
+
+		roughTerrainPercent = Random.Range(0f,1f);
+		wallPercent = Random.Range(0f,1f);
+
+		mapSize.x = Random.Range(5,20);
+		mapSize.y = Random.Range(5,20);
+
 
 		//Creating List of tiles
 		allTileCoords = new List<Coord> ();
@@ -60,7 +74,7 @@ public class MapGenerator : MonoBehaviour {
 		mapHolder.parent = transform;
 
 		
-		GameObject[,] map = new GameObject[(int)mapSize.x,(int)mapSize.y]; 
+		map = new GameObject[(int)mapSize.x,(int)mapSize.y]; 
 
 		playerPosition = GetRandomCoord();
 		Debug.Log(string.Format("The random coord is {0},{1}", playerPosition.x+1,playerPosition.y+1));
@@ -172,13 +186,45 @@ public class MapGenerator : MonoBehaviour {
 	}
 
 	Vector3 CoordToPosition(int x, int y){
-		return new Vector3 (-mapSize.x/2 + 0.5f + x, 0, -mapSize.y/2 + 0.5f + y);
+		return new Vector3 (-mapSize.x/2 + 0.5f + x, 0.01f, -mapSize.y/2 + 0.5f + y);
 	}
 
 	public Coord GetRandomCoord() {
 		Coord randomCoord = shuffledTileCoords.Dequeue();
 		shuffledTileCoords.Enqueue (randomCoord);
 		return randomCoord;
+	}
+
+	public void InstantiatePlayers(){
+		bool found = false;
+		while (!found){
+			playerPosition = GetRandomCoord();
+			tileclass = map[playerPosition.x,playerPosition.y].GetComponent<TileClass>();
+			if (tileclass.getType() != 2) {
+				Player1.localScale = new Vector3(1.8f,1.8f,1.8f); 
+				Transform player1 = (Transform)Instantiate(Player1, CoordToPosition(playerPosition.x, playerPosition.y), Quaternion.Euler(Vector3.right*90)) as Transform;
+				found = true;
+				Debug.Log("Player position is "+playerPosition.x+" "+playerPosition.y);
+			}
+		}
+	}
+
+	public void InstantiateEnemies(){
+		bool found = false;
+		while (!found){
+			enemyPosition = GetRandomCoord();
+			tileclass = map[enemyPosition.x,enemyPosition.y].GetComponent<TileClass>();
+			if (tileclass.getType() != 2 && !enemyPosition.Equals(playerPosition)) {
+				Enemy1.localScale = new Vector3(1.8f,1.8f,1.8f); 
+				Transform enemy1 = (Transform)Instantiate(Enemy1, CoordToPosition(enemyPosition.x, enemyPosition.y), Quaternion.Euler(Vector3.right*90)) as Transform;
+				found = true;
+				Debug.Log("Player position is "+enemyPosition.x+" "+enemyPosition.y);
+			}
+		}
+	}
+
+	public void InstantiateCursor() {
+		Transform cursor = (Transform)Instantiate(Cursor, new Vector3(0f,0.5f,0f), Quaternion.Euler(Vector3.right*90)) as Transform;
 	}
 
 	public struct Coord {
