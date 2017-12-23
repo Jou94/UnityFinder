@@ -8,7 +8,7 @@ public class TileClass : MonoBehaviour {
 	
 	public Vector3 pos;
 	public int type; //0 = clear, 1 = rough, 2 = wall... (TODO: More types)
-	public string ocupiedBy;
+	public string ocupant;
 	public int coverType; //0 = no cover, 1 = softCover, 2 = fullCover
 
 	//public Tile (/*Vector3 position, int typeTerrain, string character, int cover*/){
@@ -22,9 +22,13 @@ public class TileClass : MonoBehaviour {
 
 	public Vector3 getPos() {return pos;}
 
-	public void setType(int Ctype){type = Ctype;}
+	public string getOcupant() {return ocupant;}
 
-	public void setPos(Vector3 position){pos = position;}
+	public void setType(int Ctype) {type = Ctype;}
+
+	public void setPos(Vector3 position) {pos = position;}
+
+	public void setOcupant(string ocupator) {ocupant = ocupator;}
 
 	
 

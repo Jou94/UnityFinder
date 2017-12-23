@@ -1,39 +1,38 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class CursorController : MonoBehaviour {
 
 	public GameObject map;
-	Vector3 Voffset = new Vector3 (0.1f,0f,0f);
-	Vector3 Hoffset = new Vector3 (0f,0f,0.1f);
+	Vector3 Hoffset = new Vector3 (1,0f,0f);
+	Vector3 Voffset = new Vector3 (0f,0f,1);
 
 	// Use this for initialization
 	void Start () {
-		
+
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		
-		if (Input.GetKey(KeyCode.A)) {
-			transform.position = transform.position - Voffset;
-			//yield WaitForSeconds(1);
-		}
+		if (Input.GetKeyDown(KeyCode.A)) CanItMove("Left");
+		else if (Input.GetKeyDown(KeyCode.W)) CanItMove("Up");
+		else if (Input.GetKeyDown(KeyCode.S)) CanItMove("Down");
+		else if (Input.GetKeyDown(KeyCode.D)) CanItMove("Right");
+	}
 
-		if (Input.GetKey(KeyCode.W)) {
-			transform.position = transform.position + Hoffset;
-			//yield WaitForSeconds(1);
-		}
+	void CursorMove(string direction){
+		if (direction.Equals("Up")) transform.position = transform.position + Voffset;
+		else if (direction.Equals("Down")) transform.position = transform.position - Voffset;
+		else if (direction.Equals("Left")) transform.position = transform.position - Hoffset;
+		else if (direction.Equals("Right")) transform.position = transform.position + Hoffset;
+	}
 
-		if (Input.GetKey(KeyCode.S)) {
-			transform.position = transform.position - Hoffset;
-			//yield WaitForSeconds(1);
-		}
-
-		if (Input.GetKey(KeyCode.D)) {
-			transform.position = transform.position + Voffset;
-			//yield WaitForSeconds(1);
-		}
+	void CanItMove(string direction) {
+		if (direction.Equals("Up")) gameObject.SendMessage("CanCursorMove","Up");
+		else if (direction.Equals("Down")) transform.position = transform.position - Voffset;
+		else if (direction.Equals("Left")) transform.position = transform.position - Hoffset;
+		else if (direction.Equals("Right")) transform.position = transform.position + Hoffset;
 	}
 }
