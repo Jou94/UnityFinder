@@ -43,6 +43,12 @@ public class MapGenerator : MonoBehaviour {
 		InstantiateCursor();
 	}
 
+	void Update() {
+
+	}
+
+	public Vector2 getMapSize() {return mapSize;}
+
 	public void GenerateMap() {
 
 		roughTerrainPercent = Random.Range(0f,1f);
@@ -239,7 +245,7 @@ public class MapGenerator : MonoBehaviour {
 
 	public void CanCursorMove(string direction) {
 		Debug.Log("WE DID IT BOYYYYS!!!");
-		if (direction.Equals("Up") && cursorCoords.y > 0) gameObject.SendMessage("CursorMove","Up");
+		if (direction.Equals("Up") && cursorCoords.y >= mapSize.y/2) gameObject.SendMessage("CursorMove","Up");
 	}
 
 	public struct Coord {
