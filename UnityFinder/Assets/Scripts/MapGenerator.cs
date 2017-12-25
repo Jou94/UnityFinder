@@ -47,9 +47,47 @@ public class MapGenerator : MonoBehaviour {
 
 	}
 
+	public struct Coord {
+		public int x;
+		public int y;
+
+		public Coord (int _x, int _y) {
+			x = _x;
+			y = _y;
+		}
+
+		public bool Equals (Coord newCoord){
+			if (newCoord.x == x && newCoord.y == y) return true;
+			return false;
+		}
+	}
+
 	public Vector2 getMapSize() {return mapSize;}
 
-	public void GenerateMap() {
+	public Vector3 CoordToPosition(int x, int y){
+		return new Vector3 (-mapSize.x/2 + 0.5f + x, 0.01f, -mapSize.y/2 + 0.5f + y);
+	}
+
+	public float CoordXToPosition(int x){
+		return -mapSize.x/2 + 0.5f + x;
+	}
+
+	public float CoordYToPosition(int y){
+		return -mapSize.y/2 + 0.5f + y;
+	}
+
+	public Coord GetRandomCoord() {
+		Coord randomCoord = shuffledTileCoords.Dequeue();
+		shuffledTileCoords.Enqueue (randomCoord);
+		return randomCoord;
+	}
+
+	public void UpdateCursorCoords(int x, int y) {
+		cursorCoords.x += x;
+		cursorCoords.y += y;
+	}
+
+	private void GenerateMap() {
 
 		roughTerrainPercent = Random.Range(0f,1f);
 		wallPercent = Random.Range(0f,1f);
@@ -159,7 +197,7 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	bool MapIsFullyAccessible(bool[,] obstacleMap, int currentObstacleCount) {
+	private bool MapIsFullyAccessible(bool[,] obstacleMap, int currentObstacleCount) {
 		bool[,] mapFlags = new bool[obstacleMap.GetLength(0),obstacleMap.GetLength(1)];
 		Queue<Coord> queue = new Queue<Coord> ();
 		queue.Enqueue (playerCoords);
@@ -186,36 +224,19 @@ public class MapGenerator : MonoBehaviour {
 				}
 			}
 		}
-
 		int targetAccessibleTileCount = (int)(mapSize.x * mapSize.y - currentObstacleCount);
 		return targetAccessibleTileCount == accessibleTileCount;
 	}
 
-	Vector3 CoordToPosition(int x, int y){
-		return new Vector3 (-mapSize.x/2 + 0.5f + x, 0.01f, -mapSize.y/2 + 0.5f + y);
-	}
-
-	float CoordXToPosition(int x){
-		return -mapSize.x/2 + 0.5f + x;
-	}
-
-	float CoordYToPosition(int y){
-		return -mapSize.y/2 + 0.5f + y;
-	}
-
-	public Coord GetRandomCoord() {
-		Coord randomCoord = shuffledTileCoords.Dequeue();
-		shuffledTileCoords.Enqueue (randomCoord);
-		return randomCoord;
-	}
-
-	public void InstantiatePlayers(){
+	private void InstantiatePlayers(){
 		bool found = false;
 		while (!found){
 			playerCoords= GetRandomCoord();
 			tileclass = map[playerCoords.x,playerCoords.y].GetComponent<TileClass>();
 			if (tileclass.getType() != 2) {
 				Player1.localScale = new Vector3(1.8f,1.8f,1.8f); 
+				Player1.name = "Cyka";
+				Player1.tag = "Player";
 				Transform player1 = (Transform)Instantiate(Player1, CoordToPosition(playerCoords.x, playerCoords.y), Quaternion.Euler(Vector3.right*90)) as Transform;
 				found = true;
 				Debug.Log("Player position is "+playerCoords.x+" "+playerCoords.y);
@@ -223,7 +244,7 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	public void InstantiateEnemies(){
+	private void InstantiateEnemies(){
 		bool found = false;
 		while (!found){
 			enemyCoords = GetRandomCoord();
@@ -237,30 +258,9 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	public void InstantiateCursor() {
+	private void InstantiateCursor() {
 		cursorCoords = new Coord ((int)mapSize.x/2, (int)mapSize.y/2);
 		Transform cursor = (Transform)Instantiate(Cursor, new Vector3 (CoordXToPosition((int)mapSize.x/2),0.05f,CoordYToPosition((int)mapSize.y/2)), Quaternion.Euler(Vector3.right*90)) as Transform;
 		Debug.Log("Cursor position is "+cursorCoords.x+" "+cursorCoords.y);
-	}
-
-	public void UpdateCursorCoords(int x, int y) {
-		cursorCoords.x += x;
-		cursorCoords.y += y;
-		Debug.Log("Updated position: "+ cursorCoords.x+","+cursorCoords.y);
-	}
-
-	public struct Coord {
-		public int x;
-		public int y;
-
-		public Coord (int _x, int _y) {
-			x = _x;
-			y = _y;
-		}
-
-		public bool Equals (Coord newCoord){
-			if (newCoord.x == x && newCoord.y == y) return true;
-			return false;
-		}
 	}
 }
