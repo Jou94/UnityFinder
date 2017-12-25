@@ -5,6 +5,8 @@ using System;
 
 public class CursorController : MonoBehaviour {
 
+	private bool Cooldown = false;
+
 	GameObject map;
 	MapGenerator mapGeneratorScript;
 	Vector2 mapSize;
@@ -22,23 +24,68 @@ public class CursorController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		if (Input.GetKeyDown(KeyCode.A)) CursorMove("Left");
-		else if (Input.GetKeyDown(KeyCode.W)) CursorMove("Up");
-		else if (Input.GetKeyDown(KeyCode.S)) CursorMove("Down");
-		else if (Input.GetKeyDown(KeyCode.D)) CursorMove("Right");
+		if (!Cooldown){
+			if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A)) CursorMove("DUpLeft");
+			else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D)) CursorMove("DUpRight");
+			else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D)) CursorMove("DDownRight");
+			else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A)) CursorMove("DDownLeft");
+			else if (Input.GetKey(KeyCode.A)) CursorMove("Left");
+			else if (Input.GetKey(KeyCode.W)) CursorMove("Up");
+			else if (Input.GetKey(KeyCode.D)) CursorMove("Right");
+			else if (Input.GetKey(KeyCode.S)) CursorMove("Down");
+			
+			Invoke("ResetCoodldown",0.15f);
+			Cooldown = true;
+		}
 	}
 
 	void CursorMove(string direction){
-		if (direction.Equals("Up") && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) transform.position = transform.position + Voffset;
-		else if (direction.Equals("Down") && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) transform.position = transform.position - Voffset;
-		else if (direction.Equals("Left") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2)) transform.position = transform.position - Hoffset;
-		else if (direction.Equals("Right") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2)) transform.position = transform.position + Hoffset;
+		if (direction.Equals("Left") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2)) {
+			transform.position = transform.position - Hoffset;
+			mapGeneratorScript.UpdateCursorCoords(-1,0);
+		}
+
+		else if (direction.Equals("Up") && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
+			transform.position = transform.position + Voffset;
+			mapGeneratorScript.UpdateCursorCoords(0,1);
+		}
+
+		else if (direction.Equals("Down") && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
+			transform.position = transform.position - Voffset;
+			mapGeneratorScript.UpdateCursorCoords(0,-1);
+		}
+
+		else if (direction.Equals("Right") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2)) {
+			transform.position = transform.position + Hoffset;
+			mapGeneratorScript.UpdateCursorCoords(1,0);
+		}
+
+		else if (direction.Equals("DUpLeft") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2) && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
+			transform.position = transform.position - Hoffset;
+			transform.position = transform.position + Voffset;
+			mapGeneratorScript.UpdateCursorCoords(-1,1);
+		}
+
+		else if (direction.Equals("DUpRight") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2) && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
+			transform.position = transform.position + Hoffset;
+			transform.position = transform.position + Voffset;
+			mapGeneratorScript.UpdateCursorCoords(1,1);
+		}
+
+		else if (direction.Equals("DDownRight") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2) && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
+			transform.position = transform.position + Hoffset;
+			transform.position = transform.position - Voffset;
+			mapGeneratorScript.UpdateCursorCoords(1,-1);
+		}
+
+		else if (direction.Equals("DDownLeft") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2) && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
+			transform.position = transform.position - Hoffset;
+			transform.position = transform.position - Voffset;
+			mapGeneratorScript.UpdateCursorCoords(-1,-1);
+		}
 	}
 
-	void CanItMove(string direction) {
-		if (direction.Equals("Up")) gameObject.SendMessage("CanCursorMove","Up");
-		else if (direction.Equals("Down")) transform.position = transform.position - Voffset;
-		else if (direction.Equals("Left")) transform.position = transform.position - Hoffset;
-		else if (direction.Equals("Right")) transform.position = transform.position + Hoffset;
+	void ResetCoodldown (){
+		Cooldown = false;
 	}
 }

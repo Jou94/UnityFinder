@@ -243,9 +243,10 @@ public class MapGenerator : MonoBehaviour {
 		Debug.Log("Cursor position is "+cursorCoords.x+" "+cursorCoords.y);
 	}
 
-	public void CanCursorMove(string direction) {
-		Debug.Log("WE DID IT BOYYYYS!!!");
-		if (direction.Equals("Up") && cursorCoords.y >= mapSize.y/2) gameObject.SendMessage("CursorMove","Up");
+	public void UpdateCursorCoords(int x, int y) {
+		cursorCoords.x += x;
+		cursorCoords.y += y;
+		Debug.Log("Updated position: "+ cursorCoords.x+","+cursorCoords.y);
 	}
 
 	public struct Coord {
