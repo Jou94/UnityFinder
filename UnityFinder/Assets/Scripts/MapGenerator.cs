@@ -24,19 +24,27 @@ public class MapGenerator : MonoBehaviour {
 	[Range(0,1)]
 	public float wallPercent;
 
-	List<Coord> allTileCoords;
+	List<Utility.Coord> allTileCoords;
 
-	Queue<Coord> shuffledTileCoords;
+	Queue<Utility.Coord> shuffledTileCoords;
 
 	TileClass tileclass;
 
 	GameObject[,] map;
 
-	Coord cursorCoords;
-	Coord playerCoords;
-	Coord enemyCoords;
+	GameObject combatController;
+	CombatControllerScript combatControllerScript;
+
+	Utility.Coord cursorCoords;
+	Utility.Coord playerCoords;
+	Utility.Coord enemyCoords;
 
 	void Start() {
+
+		combatController = GameObject.Find("CombatController");
+		combatControllerScript = combatController.GetComponent<CombatControllerScript>();
+		combatControllerScript.setMap(map, mapSize);
+
 		GenerateMap();
 		InstantiatePlayers();
 		InstantiateEnemies();
@@ -45,21 +53,6 @@ public class MapGenerator : MonoBehaviour {
 
 	void Update() {
 
-	}
-
-	public struct Coord {
-		public int x;
-		public int y;
-
-		public Coord (int _x, int _y) {
-			x = _x;
-			y = _y;
-		}
-
-		public bool Equals (Coord newCoord){
-			if (newCoord.x == x && newCoord.y == y) return true;
-			return false;
-		}
 	}
 
 	public Vector2 getMapSize() {return mapSize;}
@@ -76,15 +69,10 @@ public class MapGenerator : MonoBehaviour {
 		return -mapSize.y/2 + 0.5f + y;
 	}
 
-	public Coord GetRandomCoord() {
-		Coord randomCoord = shuffledTileCoords.Dequeue();
+	public Utility.Coord GetRandomCoord() {
+		Utility.Coord randomCoord = shuffledTileCoords.Dequeue();
 		shuffledTileCoords.Enqueue (randomCoord);
 		return randomCoord;
-	}
-
-	public void UpdateCursorCoords(int x, int y) {
-		cursorCoords.x += x;
-		cursorCoords.y += y;
 	}
 
 	private void GenerateMap() {
@@ -97,15 +85,15 @@ public class MapGenerator : MonoBehaviour {
 
 
 		//Creating List of tiles
-		allTileCoords = new List<Coord> ();
+		allTileCoords = new List<Utility.Coord> ();
 
 		for (int x = 0; x < mapSize.x; x++) {
 			for (int y = 0; y < mapSize.y; y++) {
-				allTileCoords.Add(new Coord(x,y));
+				allTileCoords.Add(new Utility.Coord(x,y));
 			}
 		}
 
-		shuffledTileCoords = new Queue<Coord>(Utility.ShuffleArray(allTileCoords.ToArray()));
+		shuffledTileCoords = new Queue<Utility.Coord>(Utility.ShuffleArray(allTileCoords.ToArray()));
 
 
 		//Populating map with tiles
@@ -121,7 +109,6 @@ public class MapGenerator : MonoBehaviour {
 		map = new GameObject[(int)mapSize.x,(int)mapSize.y]; 
 
 		playerCoords = GetRandomCoord();
-		Debug.Log(string.Format("The random coord is {0},{1}", playerCoords.x+1,playerCoords.y+1));
 
 		for (int x = 0; x < mapSize.x; x++) {
 			for (int y = 0; y < mapSize.y; y++) {
@@ -169,7 +156,7 @@ public class MapGenerator : MonoBehaviour {
 
 		for (int i = 0; i < wallCount; i ++) {
 
-			Coord randomCoord = GetRandomCoord();
+			Utility.Coord randomCoord = GetRandomCoord();
 			wallMap[randomCoord.x, randomCoord.y] = true;
 			currentWallCount++;
 
@@ -199,14 +186,14 @@ public class MapGenerator : MonoBehaviour {
 
 	private bool MapIsFullyAccessible(bool[,] obstacleMap, int currentObstacleCount) {
 		bool[,] mapFlags = new bool[obstacleMap.GetLength(0),obstacleMap.GetLength(1)];
-		Queue<Coord> queue = new Queue<Coord> ();
+		Queue<Utility.Coord> queue = new Queue<Utility.Coord> ();
 		queue.Enqueue (playerCoords);
 		mapFlags [playerCoords.x, playerCoords.y] = true;
 
 		int accessibleTileCount = 1;
 
 		while (queue.Count > 0) {
-			Coord tile = queue.Dequeue();
+			Utility.Coord tile = queue.Dequeue();
 
 			for (int x = -1; x <= 1; x ++) {
 				for (int y = -1; y <= 1; y ++) {
@@ -216,7 +203,7 @@ public class MapGenerator : MonoBehaviour {
 						if (neighbourX >= 0 && neighbourX < obstacleMap.GetLength(0) && neighbourY >= 0 && neighbourY < obstacleMap.GetLength(1)) {
 							if (!mapFlags[neighbourX,neighbourY] && !obstacleMap[neighbourX,neighbourY]) {
 								mapFlags[neighbourX,neighbourY] = true;
-								queue.Enqueue(new Coord(neighbourX,neighbourY));
+								queue.Enqueue(new Utility.Coord(neighbourX,neighbourY));
 								accessibleTileCount ++;
 							}
 						}
@@ -235,11 +222,12 @@ public class MapGenerator : MonoBehaviour {
 			tileclass = map[playerCoords.x,playerCoords.y].GetComponent<TileClass>();
 			if (tileclass.getType() != 2) {
 				Player1.localScale = new Vector3(1.8f,1.8f,1.8f); 
-				Player1.name = "Cyka";
-				Player1.tag = "Player";
+				//Player1.name = "Cyka";
+				//Player1.tag = "Player";
 				Transform player1 = (Transform)Instantiate(Player1, CoordToPosition(playerCoords.x, playerCoords.y), Quaternion.Euler(Vector3.right*90)) as Transform;
 				found = true;
-				Debug.Log("Player position is "+playerCoords.x+" "+playerCoords.y);
+				combatControllerScript.addPlayer(playerCoords, player1.name);
+				//Debug.Log("Player position is "+playerCoords.x+" "+playerCoords.y);
 			}
 		}
 	}
@@ -253,14 +241,16 @@ public class MapGenerator : MonoBehaviour {
 				Enemy1.localScale = new Vector3(1.8f,1.8f,1.8f); 
 				Transform enemy1 = (Transform)Instantiate(Enemy1, CoordToPosition(enemyCoords.x, enemyCoords.y), Quaternion.Euler(Vector3.right*90)) as Transform;
 				found = true;
-				Debug.Log("Enemy position is "+enemyCoords.x+" "+enemyCoords.y);
+				combatControllerScript.addEnemy(enemyCoords, "Nugget");
+				//Debug.Log("Enemy position is "+enemyCoords.x+" "+enemyCoords.y);
 			}
 		}
 	}
 
 	private void InstantiateCursor() {
-		cursorCoords = new Coord ((int)mapSize.x/2, (int)mapSize.y/2);
+		cursorCoords = new Utility.Coord ((int)mapSize.x/2, (int)mapSize.y/2);
 		Transform cursor = (Transform)Instantiate(Cursor, new Vector3 (CoordXToPosition((int)mapSize.x/2),0.05f,CoordYToPosition((int)mapSize.y/2)), Quaternion.Euler(Vector3.right*90)) as Transform;
-		Debug.Log("Cursor position is "+cursorCoords.x+" "+cursorCoords.y);
+		combatControllerScript.setCursorCoords(cursorCoords);
+		//Debug.Log("Cursor position is "+cursorCoords.x+" "+cursorCoords.y);
 	}
 }

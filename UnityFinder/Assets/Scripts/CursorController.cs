@@ -9,6 +9,10 @@ public class CursorController : MonoBehaviour {
 
 	GameObject map;
 	MapGenerator mapGeneratorScript;
+
+	GameObject combatController;
+	CombatControllerScript combatControllerScript;
+
 	Vector2 mapSize;
 	Vector2 initialPos;
 	Vector3 Hoffset = new Vector3 (1,0f,0f);
@@ -17,9 +21,13 @@ public class CursorController : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		initialPos = transform.position;
+
 		map = GameObject.Find("Map");
 		mapGeneratorScript = map.GetComponent<MapGenerator>();
 		mapSize = mapGeneratorScript.getMapSize();
+
+		combatController = GameObject.Find("CombatController");
+		combatControllerScript = combatController.GetComponent<CombatControllerScript>();
 	}
 	
 	// Update is called once per frame
@@ -42,46 +50,46 @@ public class CursorController : MonoBehaviour {
 	void CursorMove(string direction){
 		if (direction.Equals("Left") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2)) {
 			transform.position = transform.position - Hoffset;
-			mapGeneratorScript.UpdateCursorCoords(-1,0);
+			combatControllerScript.UpdateCursorCoords(-1,0);
 		}
 
 		else if (direction.Equals("Up") && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position + Voffset;
-			mapGeneratorScript.UpdateCursorCoords(0,1);
+			combatControllerScript.UpdateCursorCoords(0,1);
 		}
 
 		else if (direction.Equals("Down") && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position - Voffset;
-			mapGeneratorScript.UpdateCursorCoords(0,-1);
+			combatControllerScript.UpdateCursorCoords(0,-1);
 		}
 
 		else if (direction.Equals("Right") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2)) {
 			transform.position = transform.position + Hoffset;
-			mapGeneratorScript.UpdateCursorCoords(1,0);
+			combatControllerScript.UpdateCursorCoords(1,0);
 		}
 
 		else if (direction.Equals("DUpLeft") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2) && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position - Hoffset;
 			transform.position = transform.position + Voffset;
-			mapGeneratorScript.UpdateCursorCoords(-1,1);
+			combatControllerScript.UpdateCursorCoords(-1,1);
 		}
 
 		else if (direction.Equals("DUpRight") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2) && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position + Hoffset;
 			transform.position = transform.position + Voffset;
-			mapGeneratorScript.UpdateCursorCoords(1,1);
+			combatControllerScript.UpdateCursorCoords(1,1);
 		}
 
 		else if (direction.Equals("DDownRight") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2) && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position + Hoffset;
 			transform.position = transform.position - Voffset;
-			mapGeneratorScript.UpdateCursorCoords(1,-1);
+			combatControllerScript.UpdateCursorCoords(1,-1);
 		}
 
 		else if (direction.Equals("DDownLeft") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2) && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position - Hoffset;
 			transform.position = transform.position - Voffset;
-			mapGeneratorScript.UpdateCursorCoords(-1,-1);
+			combatControllerScript.UpdateCursorCoords(-1,-1);
 		}
 	}
 

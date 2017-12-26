@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class PlayerClass : MonoBehaviour {
 
+	GameObject combatController;
+	CombatControllerScript combatControllerScript;
+
 	string id = "0";
 	string name = "Boris";
 	string race = "Human";
@@ -24,7 +27,7 @@ public class PlayerClass : MonoBehaviour {
 	int wisdomMod;
 	int charismaMod;
 	public int hp;
-	int iniciative;
+	int initiative;
 	int initiativeMod = 2;
 	int speed = 30;
 	int armourSpeed = 20;
@@ -51,6 +54,12 @@ public class PlayerClass : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+
+		gameObject.name = this.name;
+
+		combatController = GameObject.Find("CombatController");
+		combatControllerScript = combatController.GetComponent<CombatControllerScript>();
+
 		//Debug.Log(classes[0].name+ " " + classes[0].lvl);
 		strenghtMod = (int)Mathf.Floor((strenght - 10)/2);
 		dexterityMod = (int)Mathf.Floor((dexterity - 10)/2);
@@ -76,5 +85,12 @@ public class PlayerClass : MonoBehaviour {
 			name = _name;
 			lvl = _lvl;
 		}
+	}
+
+	public void RollInitiative(){
+		Debug.Log("MesageRecieved");
+		initiative = Random.Range(0,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
+		combatControllerScript.RecieveInitiative(name,initiative,true);
+		//Debug.Log(initiative);
 	}
 }

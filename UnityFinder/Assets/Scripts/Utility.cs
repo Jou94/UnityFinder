@@ -17,4 +17,31 @@ public class Utility {
 
 		return array;
 	}
+
+	public struct Coord {
+		public int x;
+		public int y;
+
+		public Coord (int _x, int _y) {
+			x = _x;
+			y = _y;
+		}
+
+		public bool Equals (Coord newCoord){
+			if (newCoord.x == x && newCoord.y == y) return true;
+			return false;
+		}
+	}
+
+	public struct Ini {
+		public string name;
+		public int initiative;
+		public bool isPlayer;
+
+		public Ini (string _name, int _initiative, bool _isPlayer) {
+			name = _name;
+			initiative = _initiative;
+			isPlayer = _isPlayer;
+		}
+	}
 }

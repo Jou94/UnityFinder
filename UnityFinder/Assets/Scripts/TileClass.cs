@@ -51,7 +51,7 @@ public class TileClass : MonoBehaviour {
 		}
 
 		else if (gameObject.tag == "DirtRockTile") {
-			Debug.Log("DirtRockTerrain");
+			//Debug.Log("DirtRockTerrain");
 			pos = transform.position;
 			type = 2;
 			coverType = 2;
