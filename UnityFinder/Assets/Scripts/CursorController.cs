@@ -13,6 +13,9 @@ public class CursorController : MonoBehaviour {
 	GameObject combatController;
 	CombatControllerScript combatControllerScript;
 
+	public enum GameState {Idle, PlayerMovement, PlayerAttack}
+	public GameState currentState;
+
 	Vector2 mapSize;
 	Vector2 initialPos;
 	Vector3 Hoffset = new Vector3 (1,0f,0f);
@@ -28,26 +31,46 @@ public class CursorController : MonoBehaviour {
 
 		combatController = GameObject.Find("CombatController");
 		combatControllerScript = combatController.GetComponent<CombatControllerScript>();
+
+		SetCurrentState(GameState.Idle);
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if (!Cooldown){
-			if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A)) CursorMove("DUpLeft");
-			else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D)) CursorMove("DUpRight");
-			else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D)) CursorMove("DDownRight");
-			else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A)) CursorMove("DDownLeft");
-			else if (Input.GetKey(KeyCode.A)) CursorMove("Left");
-			else if (Input.GetKey(KeyCode.W)) CursorMove("Up");
-			else if (Input.GetKey(KeyCode.D)) CursorMove("Right");
-			else if (Input.GetKey(KeyCode.S)) CursorMove("Down");
-			
-			Invoke("ResetCoodldown",0.15f);
-			Cooldown = true;
+		switch (currentState){
+			case GameState.Idle:
+				if (!Cooldown){
+					if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A)) CursorMove("DUpLeft");
+					else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D)) CursorMove("DUpRight");
+					else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D)) CursorMove("DDownRight");
+					else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A)) CursorMove("DDownLeft");
+					else if (Input.GetKey(KeyCode.A)) CursorMove("Left");
+					else if (Input.GetKey(KeyCode.W)) CursorMove("Up");
+					else if (Input.GetKey(KeyCode.D)) CursorMove("Right");
+					else if (Input.GetKey(KeyCode.S)) CursorMove("Down");
+					
+					Invoke("ResetCoodldown",0.10f);
+					Cooldown = true;
+				}
+
+
+
+				break;
+
+			case GameState.PlayerMovement:
+				break;
+
+			case GameState. PlayerAttack:
+				break;
 		}
+		
 	}
 
-	void CursorMove(string direction){
+	public void SetCurrentState (GameState state) {
+		currentState = state;
+	}
+
+	private void CursorMove(string direction){
 		if (direction.Equals("Left") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2)) {
 			transform.position = transform.position - Hoffset;
 			combatControllerScript.UpdateCursorCoords(-1,0);
@@ -93,7 +116,8 @@ public class CursorController : MonoBehaviour {
 		}
 	}
 
-	void ResetCoodldown (){
+
+	private void ResetCoodldown (){
 		Cooldown = false;
 	}
 }

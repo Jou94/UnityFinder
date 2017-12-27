@@ -57,6 +57,8 @@ public class MapGenerator : MonoBehaviour {
 
 	public Vector2 getMapSize() {return mapSize;}
 
+	public GameObject[,] getMap() {return map;}
+
 	public Vector3 CoordToPosition(int x, int y){
 		return new Vector3 (-mapSize.x/2 + 0.5f + x, 0.01f, -mapSize.y/2 + 0.5f + y);
 	}

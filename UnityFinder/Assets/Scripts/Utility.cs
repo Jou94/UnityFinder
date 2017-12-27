@@ -31,6 +31,12 @@ public class Utility {
 			if (newCoord.x == x && newCoord.y == y) return true;
 			return false;
 		}
+
+		public Coord Add (Coord addedCoord) {
+			x += addedCoord.x;
+			y += addedCoord.y;
+			return new Coord(x,y); 
+		}
 	}
 
 	public struct Ini {

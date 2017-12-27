@@ -2,25 +2,25 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerClass : MonoBehaviour {
+public class EnemyClass : MonoBehaviour {
 
 	GameObject combatController;
 	CombatControllerScript combatControllerScript;
 
-	string id = "0";
-	string name = "Boris";
-	string race = "Human";
-	int alingment = 4; //1 LG, 2 LN, 3 LE, 4 NG, 5 N, 6 NE, 7 CG, 8 CN, 9 CE
-	int size = 0; //0 = medium, -1 = Large, 1 = Small (and so on and so forth)
-	int lvl = 1;
-	Class[] classes = {new Class("Fighter",1)};
-	int strenght = 18;
-	int dexterity = 14;
-	int constitution = 14;
-	int intelligence = 8;
-	int wisdom = 8;
-	int charisma = 12;
-	int strenghtMod;
+	string id = "50";
+	string name = "Nugget";
+	string race = "Goblinoid";
+	int alingment = 6; //1 LG, 2 LN, 3 LE, 4 NG, 5 N, 6 NE, 7 CG, 8 CN, 9 CE
+	int size = 1; //0 = medium, -1 = Large, 1 = Small (and so on and so forth)
+	float cr = 1/3;
+	//Class[] classes = {new Class("Fighter",1)};
+	int strenght = 11;
+	int dexterity = 15;
+	int constitution = 12;
+	int intelligence = 10;
+	int wisdom = 9;
+	int charisma = 6;
+	public int strenghtMod;
 	int dexterityMod;
 	int constitutionMod;
 	int intelligenceMod;
@@ -28,14 +28,14 @@ public class PlayerClass : MonoBehaviour {
 	int charismaMod;
 	public int hp;
 	public int initiative;
-	int initiativeMod = 2;
+	int initiativeMod = 6;
 	int speed = 30;
-	int armourSpeed = 20;
+	int armourSpeed = 30;
 	int flySpeed = 0;
 	int sSeepd = 0;
 	int bab = 1;
 	public int mAttack;
-	int rAttack;
+	public int rAttack;
 	public int ac;
 	int cmb;
 	int cmd;
@@ -48,15 +48,14 @@ public class PlayerClass : MonoBehaviour {
 	int will;
 	int dodgeBonus = 0;
 	int deflectionBonus = 0;
-	int armourBonus = 6;
-	int shieldBonus = 0;
+	int armourBonus = 2;
+	int shieldBonus = 1;
 	int natArmourBonus = 0;
 
 	// Use this for initialization
 	void Start () {
-
 		gameObject.name = this.name;
-		gameObject.tag = "Player";
+		gameObject.tag = "Enemy";
 
 		combatController = GameObject.Find("CombatController");
 		combatControllerScript = combatController.GetComponent<CombatControllerScript>();
@@ -64,27 +63,12 @@ public class PlayerClass : MonoBehaviour {
 		calculateStats();
 
 		RollInitiative();
-
-		//Debug.Log(classes[0].name+ " " + classes[0].lvl);
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		
 	}
-
-	public struct Class {
-		public string name;
-		public int lvl;
-
-		public Class (string _name, int _lvl) {
-			name = _name;
-			lvl = _lvl;
-		}
-	}
-
-	public string getName(){return name;}
-	public int getSpeed(){return armourSpeed;}
 
 	public void RollInitiative(){
 		initiative = Random.Range(0,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
@@ -99,8 +83,9 @@ public class PlayerClass : MonoBehaviour {
 		intelligenceMod = (int)Mathf.Floor((intelligence - 10)/2);
 		wisdomMod = (int)Mathf.Floor((wisdom - 10)/2);
 		charismaMod = (int)Mathf.Floor((charisma - 10)/2);
-		hp = 10 + 1+ constitutionMod;
-		mAttack = bab + strenghtMod;
+		hp = 10 + constitutionMod;
+		mAttack = bab + strenghtMod + 1;
+		rAttack = bab + dexterityMod + 1;
 		ac = 10 + armourBonus + dexterityMod + dodgeBonus + deflectionBonus + natArmourBonus + shieldBonus + size;
 	}
 }
