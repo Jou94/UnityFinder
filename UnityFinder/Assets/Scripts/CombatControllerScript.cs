@@ -6,6 +6,7 @@ using UnityEngine;
 public class CombatControllerScript : MonoBehaviour {
 
 	GameObject[,] map;
+	bool[,] visitedMap;
 	Vector2 mapSize;
 	GameObject mapObject;
 	MapGenerator mapGeneratorScript;
@@ -14,6 +15,9 @@ public class CombatControllerScript : MonoBehaviour {
 
 	GameObject player;
 	PlayerClass playerScript;
+
+	GameObject cursor;
+	CursorController cursorScript;
 
 	int combatantNumber = 0;
 	String[] turnOrder;
@@ -31,8 +35,6 @@ public class CombatControllerScript : MonoBehaviour {
 		mapGeneratorScript = mapObject.GetComponent<MapGenerator>();
 		map = mapGeneratorScript.getMap();
 		mapSize = mapGeneratorScript.getMapSize();
-
-
 	}
 	
 	// Update is called once per frame
@@ -42,7 +44,9 @@ public class CombatControllerScript : MonoBehaviour {
 			if (Input.GetKeyDown(KeyCode.Alpha1)) {
 				//Debug.Log("TIME TO MOVE, BOYS!");	
 				int playerSpeed = playerScript.getSpeed();
-				showPlayerMovementArea(playerSpeed/5);
+				//(showPlayerMovementArea(playerSpeed/5);
+				cursorScript.SetStatePlayerMovement(playerSpeed);
+				cursorScript.SetPlayerPosition(playerCoords);
 				//Debug.Log(playerName);	
 			}	
 		}
@@ -55,7 +59,14 @@ public class CombatControllerScript : MonoBehaviour {
 		mapSize = _mapSize;
 	}
 
+	public void setCursor(GameObject _cursor, CursorController _cursorScript) {
+		cursor = _cursor;
+		cursorScript = _cursorScript;
+	}
+
 	public void setCursorCoords (Utility.Coord _cursorCoords) {cursorCoords = _cursorCoords;}
+
+	public Utility.Coord getCursorCoords() {return cursorCoords;}
 
 	public void addPlayer (Utility.Coord _playerCoords, string playerName) {
 		playerCoords = _playerCoords;
@@ -77,8 +88,10 @@ public class CombatControllerScript : MonoBehaviour {
 	}
 
 	public void UpdateCursorCoords(int x, int y) {
-		cursorCoords.x += x;
-		cursorCoords.y += y;
+		if (cursorCoords.x + x > 0 && cursorCoords.x + x < mapSize.x && cursorCoords.y + y > 0 && cursorCoords.y + y < mapSize.y) {
+			cursorCoords.x += x;
+			cursorCoords.y += y;
+		}
 		//Debug.Log("Curosr: " + cursorCoords.x + " " + cursorCoords.y + "/ Player: " + playerCoords.x + " " + playerCoords.y);
 	}
 
@@ -86,46 +99,51 @@ public class CombatControllerScript : MonoBehaviour {
 		//Debug.Log("Movement Range = " + movementCells);
 		int distance = 0;
 		Queue<Utility.Coord> cellQueue = new Queue<Utility.Coord>();
-		cellQueue.Enqueue (playerCoords);
+		visitedMap = new bool[(int)mapSize.x,(int)mapSize.y];
+		//cellQueue.Enqueue (playerCoords);
 		Debug.Log ("Boris is in: " + playerCoords.x + " " + playerCoords.y);
 
 		for (int i = 0; i < 8; i++){
-			bfs(cellQueue, i, distance, movementCells);
+			Debug.Log("volta de bucle: " + i + " cellQueue size: " + cellQueue.Count);
+			cellQueue.Enqueue (playerCoords.Add(neighbours[i]));
+			bfs(cellQueue, i, distance, movementCells, visitedMap);
 		} 
 	}
 
-	private void bfs (Queue<Utility.Coord> cellQueue, int i, int distance, int movementCells) {
+	private void bfs (Queue<Utility.Coord> cellQueue, int i, int distance, int movementCells, bool[,] visitedMap) {
 		while (cellQueue.Count > 0 && distance <= movementCells*2) {
 			Utility.Coord currentCell = cellQueue.Dequeue();
 
-			Utility.Coord neighbour = currentCell.Add(neighbours[i]);
-			Debug.Log (neighbour.x + " " + neighbour.y);
-			if (neighbour.x >= 0 && neighbour.x <= mapSize.x && neighbour.y >= 0 && neighbour.y <=  mapSize.y) {
-				tileclass = map[neighbour.x,neighbour.y].GetComponent<TileClass>();
+			
+			Debug.Log (currentCell.x + " " + currentCell.y);
+			if (currentCell.x >= 0 && currentCell.x < mapSize.x && currentCell.y >= 0 && currentCell.y <  mapSize.y) {
+				tileclass = map[currentCell.x,currentCell.y].GetComponent<TileClass>();
 				if (tileclass.getType() != 2 && distance <= movementCells) {
 
 					//paint blue
-					Debug.Log("Cell " + neighbour.x + " " + neighbour.y + " is painted BLUE");
-					cellQueue.Enqueue(neighbour);
+					Debug.Log("Cell " + currentCell.x + " " + currentCell.y + " is painted BLUE");
+					//cellQueue.Enqueue(currentCell);
 
 					if (tileclass.getType() == 1) distance +=2;
 					else distance++;
 
 					for (int j = 0; j < 8; j++){
-						bfs(cellQueue, j, distance, movementCells);
+						cellQueue.Enqueue(currentCell.Add(neighbours[i]));
+						bfs(cellQueue, j, distance, movementCells, visitedMap);
 					} 
 				}
 				else if (tileclass.getType() != 2 && distance <= movementCells*2) {
 
 					//paint yellow
-					Debug.Log("Cell " + neighbour.x + " " + neighbour.y + " is painted YELLOW");
-					cellQueue.Enqueue(neighbour);
+					Debug.Log("Cell " + currentCell.x + " " + currentCell.y + " is painted YELLOW");
+					//cellQueue.Enqueue(currentCell);
 
 					if (tileclass.getType() == 1) distance +=2;
 					else distance++;
 
 					for (int j = 0; j < 8; j++){
-						bfs(cellQueue, j, distance, movementCells);
+						cellQueue.Enqueue(currentCell.Add(neighbours[i]));
+						bfs(cellQueue, j, distance, movementCells, visitedMap);
 					} 
 				}
 			}

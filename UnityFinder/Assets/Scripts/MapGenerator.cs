@@ -35,6 +35,9 @@ public class MapGenerator : MonoBehaviour {
 	GameObject combatController;
 	CombatControllerScript combatControllerScript;
 
+	GameObject cursor;
+	CursorController cursorScript;
+
 	Utility.Coord cursorCoords;
 	Utility.Coord playerCoords;
 	Utility.Coord enemyCoords;
@@ -49,6 +52,11 @@ public class MapGenerator : MonoBehaviour {
 		InstantiatePlayers();
 		InstantiateEnemies();
 		InstantiateCursor();
+
+		cursor = GameObject.Find("Cursor(Clone)");
+		cursorScript = cursor.GetComponent<CursorController>();
+
+		combatControllerScript.setCursor(cursor, cursorScript);
 	}
 
 	void Update() {

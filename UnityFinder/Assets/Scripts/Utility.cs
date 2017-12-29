@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using UnityEngine;
+using System;
 
 
 public class Utility {
@@ -36,6 +38,11 @@ public class Utility {
 			x += addedCoord.x;
 			y += addedCoord.y;
 			return new Coord(x,y); 
+		}
+
+		public int Difference (Coord otherCoord) {
+			//Debug.Log(Mathf.Abs(x - otherCoord.x) + Mathf.Abs(y - otherCoord.y));
+			return  Mathf.Abs(x - otherCoord.x) + Mathf.Abs(y - otherCoord.y);
 		}
 	}
 
