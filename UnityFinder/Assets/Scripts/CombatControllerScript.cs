@@ -15,6 +15,8 @@ public class CombatControllerScript : MonoBehaviour {
 
 	GameObject player;
 	PlayerClass playerScript;
+	Utility.Coord playerCoords;
+	Transform playerTransform;
 
 	GameObject cursor;
 	CursorController cursorScript;
@@ -24,7 +26,7 @@ public class CombatControllerScript : MonoBehaviour {
 	List<Utility.Ini> initiatives = new List<Utility.Ini>();
 
 	Utility.Coord cursorCoords;
-	Utility.Coord playerCoords;
+	
 	Utility.Coord enemyCoords;
 
 	Utility.Coord[] neighbours = {new Utility.Coord (0,1), new Utility.Coord (1,1), new Utility.Coord (1,0), new Utility.Coord (1,-1), new Utility.Coord (0,-1), new Utility.Coord (-1,-1), new Utility.Coord (-1,0), new Utility.Coord (-1,1)};
@@ -48,6 +50,13 @@ public class CombatControllerScript : MonoBehaviour {
 				cursorScript.SetStatePlayerMovement(playerSpeed);
 				cursorScript.SetPlayerPosition(playerCoords);
 				//Debug.Log(playerName);	
+			}
+
+			else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+				Debug.Log("TIME TO ATTACK, BOYS!");
+				int playerRange = playerScript.getRange();
+				cursorScript.SetStatePlayerAttack(playerRange);
+				cursorScript.SetPlayerPosition(playerCoords);	
 			}	
 		}
 	}
@@ -68,12 +77,13 @@ public class CombatControllerScript : MonoBehaviour {
 
 	public Utility.Coord getCursorCoords() {return cursorCoords;}
 
-	public void addPlayer (Utility.Coord _playerCoords, string playerName) {
+	public void addPlayer (Utility.Coord _playerCoords, string playerName, Transform _playerTransform) {
 		playerCoords = _playerCoords;
 		combatantNumber++;
 
 		player = GameObject.Find(playerName);
 		playerScript = player.GetComponent<PlayerClass>();
+		playerTransform = _playerTransform;
 	}
 
 	public void addEnemy (Utility.Coord _enemyCoords, string enemyName) {
@@ -91,8 +101,15 @@ public class CombatControllerScript : MonoBehaviour {
 		if (cursorCoords.x + x > 0 && cursorCoords.x + x < mapSize.x && cursorCoords.y + y > 0 && cursorCoords.y + y < mapSize.y) {
 			cursorCoords.x += x;
 			cursorCoords.y += y;
+
 		}
 		//Debug.Log("Curosr: " + cursorCoords.x + " " + cursorCoords.y + "/ Player: " + playerCoords.x + " " + playerCoords.y);
+	}
+
+	public void movePlayer(Utility.Coord newPlayerCoords){
+		playerCoords = newPlayerCoords;
+		playerTransform.position = mapGeneratorScript.CoordToPosition(playerCoords.x, playerCoords.y);
+		cursorScript.SetPlayerPosition(playerCoords);
 	}
 
 	private void showPlayerMovementArea(int movementCells) {

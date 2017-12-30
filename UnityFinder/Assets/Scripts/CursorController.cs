@@ -7,6 +7,8 @@ public class CursorController : MonoBehaviour {
 
 	private bool Cooldown = false;
 
+	TileClass tileclass;
+
 	GameObject map;
 	MapGenerator mapGeneratorScript;
 
@@ -21,10 +23,12 @@ public class CursorController : MonoBehaviour {
 
 	public int maxplayerDistance;
 	public int playerDistance = 0;
+	public int maxAttackRange;
+	public int attackRange = 0;
 
 	Vector2 mapSize;
 	Utility.Coord playerCoords;
-	Utility.Coord position;
+	Utility.Coord cursorCoords;
 	Utility.Coord temporal;
 	Vector3 Hoffset = new Vector3 (1,0f,0f);
 	Vector3 Voffset = new Vector3 (0f,0f,1);
@@ -39,7 +43,7 @@ public class CursorController : MonoBehaviour {
 		combatController = GameObject.Find("CombatController");
 		combatControllerScript = combatController.GetComponent<CombatControllerScript>();
 
-		position = combatControllerScript.getCursorCoords();
+		cursorCoords = combatControllerScript.getCursorCoords();
 
 		SetStateIdle();
 	}
@@ -49,6 +53,9 @@ public class CursorController : MonoBehaviour {
 		switch (currentState){
 			case GameState.Idle:
 				if (!Cooldown){
+					temporal = cursorCoords;
+					//Debug.Log(temporal.x + " " + temporal.y);
+					//Debug.Log(cursorCoords.x + " " + cursorCoords.y);
 					//Debug.Log("Idle");
 					//if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A)) CursorMove("DUpLeft");
 					//else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D)) CursorMove("DUpRight");
@@ -66,13 +73,18 @@ public class CursorController : MonoBehaviour {
 
 			case GameState.PlayerMovement:
 			//Debug.Log(position.x + " " + position.y);
+				temporal = cursorCoords;
 				if (!Cooldown){
-					temporal = position;
+					//Debug.Log(playerCoords.Difference(cursorCoords.Add(new Utility.Coord(-1,0))));
+					//Debug.Log(playerCoords.x + " " + playerCoords.y);
+					//Debug.Log(temporal.x + " " + temporal.y);
+					//Debug.Log(cursorCoords.x + " " + cursorCoords.y);
 					//if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.A)) CursorMove("DUpLeft");
 					//else if (Input.GetKey(KeyCode.W) && Input.GetKey(KeyCode.D)) CursorMove("DUpRight");
 					//else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.D)) CursorMove("DDownRight");
 					//else if (Input.GetKey(KeyCode.S) && Input.GetKey(KeyCode.A)) CursorMove("DDownLeft");
-					if (Input.GetKey(KeyCode.A) && playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))) <= maxplayerDistance) {
+					(mapGeneratorScript.getTile(cursorCoords.Add(new Utility.Coord(-1,0)))).getType();
+					if (Input.GetKey(KeyCode.A) && (mapGeneratorScript.getTile(cursorCoords.Add(new Utility.Coord(-1,0)))).getType() !=2 && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(-1,0))) <= maxplayerDistance) {
 						//Debug.Log(playerCoords.Difference(position.Add(new Utility.Coord(-1,0))));
 						CursorMove("Left");
 						Invoke("ResetCoodldown",0.10f);
@@ -80,7 +92,7 @@ public class CursorController : MonoBehaviour {
 						
 					}
 
-					else if (Input.GetKey(KeyCode.W) && playerCoords.Difference(temporal.Add(new Utility.Coord(0,1))) <= maxplayerDistance) {
+					else if (Input.GetKey(KeyCode.W) && (mapGeneratorScript.getTile(cursorCoords.Add(new Utility.Coord(0,1)))).getType() !=2 && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(0,1))) <= maxplayerDistance) {
 						//Debug.Log(playerCoords.Difference(position.Add(new Utility.Coord(-1,0))));
 						CursorMove("Up");
 						Invoke("ResetCoodldown",0.10f);
@@ -88,7 +100,7 @@ public class CursorController : MonoBehaviour {
 						
 					}
 
-					else if (Input.GetKey(KeyCode.D) && playerCoords.Difference(temporal.Add(new Utility.Coord(1,0))) <= maxplayerDistance) {
+					else if (Input.GetKey(KeyCode.D) && (mapGeneratorScript.getTile(cursorCoords.Add(new Utility.Coord(1,0)))).getType() !=2 && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(1,0))) <= maxplayerDistance) {
 						//Debug.Log(playerCoords.Difference(position.Add(new Utility.Coord(-1,0))));
 						CursorMove("Right");
 						Invoke("ResetCoodldown",0.10f);
@@ -96,7 +108,7 @@ public class CursorController : MonoBehaviour {
 						
 					}
 
-					else if (Input.GetKey(KeyCode.S) && playerCoords.Difference(temporal.Add(new Utility.Coord(0,-1))) <= maxplayerDistance) {
+					else if (Input.GetKey(KeyCode.S) && (mapGeneratorScript.getTile(cursorCoords.Add(new Utility.Coord(0,-1)))).getType() !=2 && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(0,-1))) <= maxplayerDistance) {
 						//Debug.Log(playerCoords.Difference(position.Add(new Utility.Coord(-1,0))));
 						//Debug.Log("MAX IS: "+ maxplayerDistance);
 						CursorMove("Down");
@@ -107,11 +119,58 @@ public class CursorController : MonoBehaviour {
 
 				}
 
+				if (Input.GetKeyDown(KeyCode.Alpha1) && !cursorCoords.Equals(playerCoords)) {
+					//Debug.Log("Moving here!");
+					movePlayer();
+					goBack();
+
+				}
+
 				if (Input.GetKey(KeyCode.Q)) goBack();
 
 				break;
 
-			case GameState. PlayerAttack:
+			case GameState.PlayerAttack:
+				temporal = cursorCoords;
+				if (!Cooldown){
+					
+					Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))));
+					Debug.Log(playerCoords.x + " " + playerCoords.y);
+					Debug.Log(temporal.x + " " + temporal.y);
+					Debug.Log(cursorCoords.x + " " + cursorCoords.y);
+
+					if (Input.GetKey(KeyCode.A) && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(-1,0))) <= maxAttackRange) {
+						//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))));
+						CursorMove("Left");
+						Invoke("ResetCoodldown",0.10f);
+						Cooldown = true;
+					}
+
+					else if (Input.GetKey(KeyCode.W)  && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(0,1))) <= maxAttackRange) {
+						Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(0,1))));
+						CursorMove("Up");
+						Invoke("ResetCoodldown",0.10f);
+						Cooldown = true;
+					}
+
+					else if (Input.GetKey(KeyCode.D) && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(1,0))) <= maxAttackRange) {
+						//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(1,0))));
+						CursorMove("Right");
+						Invoke("ResetCoodldown",0.10f);
+						Cooldown = true;
+					}
+
+					else if (Input.GetKey(KeyCode.S) && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(0,-1))) <= maxAttackRange) {
+						//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(0,-1))));
+						CursorMove("Down");
+						Invoke("ResetCoodldown",0.10f);
+						Cooldown = true;
+					}
+
+				}
+
+				if (Input.GetKey(KeyCode.Q)) goBack();
+
 				break;
 		}
 		
@@ -122,12 +181,19 @@ public class CursorController : MonoBehaviour {
 	}
 
 	public void SetStatePlayerMovement(int movement) {
-		currentState = GameState.PlayerMovement;
-		maxplayerDistance = (movement/5)*2;
+		if (currentState == GameState.Idle) { 
+			currentState = GameState.PlayerMovement;
+			maxplayerDistance = (movement/5)*2;
+		}
+		
 	}
 
-	public void SetStatePlayerAttack() {
-		currentState = GameState.PlayerAttack;
+	public void SetStatePlayerAttack(int range) {
+		if (currentState == GameState.Idle) { 
+			currentState = GameState.PlayerAttack;
+			maxAttackRange = range/5;
+			Debug.Log(maxAttackRange);
+		}
 	}
 
 	public void SetPlayerPosition(Utility.Coord _playerCoords) {
@@ -136,6 +202,7 @@ public class CursorController : MonoBehaviour {
 
 	private void goBack() {
 		playerDistance = 0;
+		attackRange = 0;
 		currentState = GameState.Idle;
 	}
 
@@ -143,55 +210,59 @@ public class CursorController : MonoBehaviour {
 		if (direction.Equals("Left") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2)) {
 			transform.position = transform.position - Hoffset;
 			combatControllerScript.UpdateCursorCoords(-1,0);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 			
 		}
 
 		else if (direction.Equals("Up") && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position + Voffset;
 			combatControllerScript.UpdateCursorCoords(0,1);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
 
 		else if (direction.Equals("Down") && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position - Voffset;
 			combatControllerScript.UpdateCursorCoords(0,-1);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
 
 		else if (direction.Equals("Right") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2)) {
 			transform.position = transform.position + Hoffset;
 			combatControllerScript.UpdateCursorCoords(1,0);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
 
 		else if (direction.Equals("DUpLeft") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2) && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position - Hoffset;
 			transform.position = transform.position + Voffset;
 			combatControllerScript.UpdateCursorCoords(-1,1);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
 
 		else if (direction.Equals("DUpRight") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2) && (transform.position.z + Voffset.z) <= Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position + Hoffset;
 			transform.position = transform.position + Voffset;
 			combatControllerScript.UpdateCursorCoords(1,1);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
 
 		else if (direction.Equals("DDownRight") && (transform.position.x + Hoffset.x) <= Mathf.Floor(mapSize.x/2) && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position + Hoffset;
 			transform.position = transform.position - Voffset;
 			combatControllerScript.UpdateCursorCoords(1,-1);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
 
 		else if (direction.Equals("DDownLeft") && (transform.position.x - Hoffset.x) >= -Mathf.Floor(mapSize.x/2) && (transform.position.z - Voffset.z) >= -Mathf.Floor(mapSize.y/2)) {
 			transform.position = transform.position - Hoffset;
 			transform.position = transform.position - Voffset;
 			combatControllerScript.UpdateCursorCoords(-1,-1);
-			position = combatControllerScript.getCursorCoords();
+			cursorCoords = combatControllerScript.getCursorCoords();
 		}
+	}
+
+	private void movePlayer() {
+		combatControllerScript.movePlayer(cursorCoords);
 	}
 
 

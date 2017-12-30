@@ -79,6 +79,10 @@ public class MapGenerator : MonoBehaviour {
 		return -mapSize.y/2 + 0.5f + y;
 	}
 
+	public TileClass getTile (Utility.Coord coord) {
+		return map[coord.x, coord.y].GetComponent<TileClass>();
+	}
+
 	public Utility.Coord GetRandomCoord() {
 		Utility.Coord randomCoord = shuffledTileCoords.Dequeue();
 		shuffledTileCoords.Enqueue (randomCoord);
@@ -236,7 +240,7 @@ public class MapGenerator : MonoBehaviour {
 				//Player1.tag = "Player";
 				Transform player1 = (Transform)Instantiate(Player1, CoordToPosition(playerCoords.x, playerCoords.y), Quaternion.Euler(Vector3.right*90)) as Transform;
 				found = true;
-				combatControllerScript.addPlayer(playerCoords, player1.name);
+				combatControllerScript.addPlayer(playerCoords, player1.name, player1);
 				//Debug.Log("Player position is "+playerCoords.x+" "+playerCoords.y);
 			}
 		}

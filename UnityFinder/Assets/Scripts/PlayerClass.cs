@@ -33,6 +33,8 @@ public class PlayerClass : MonoBehaviour {
 	int armourSpeed = 20;
 	int flySpeed = 0;
 	int sSeepd = 0;
+	int naturalRange = 5;
+	int weaponRange = 5;
 	int bab = 1;
 	public int mAttack;
 	int rAttack;
@@ -85,6 +87,7 @@ public class PlayerClass : MonoBehaviour {
 
 	public string getName(){return name;}
 	public int getSpeed(){return armourSpeed;}
+	public int getRange(){return weaponRange;}
 
 	public void RollInitiative(){
 		initiative = Random.Range(0,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)

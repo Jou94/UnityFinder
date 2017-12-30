@@ -35,9 +35,9 @@ public class Utility {
 		}
 
 		public Coord Add (Coord addedCoord) {
-			x += addedCoord.x;
-			y += addedCoord.y;
-			return new Coord(x,y); 
+			//x += addedCoord.x;
+			//y += addedCoord.y;
+			return new Coord(x+addedCoord.x,y+addedCoord.y); 
 		}
 
 		public int Difference (Coord otherCoord) {
