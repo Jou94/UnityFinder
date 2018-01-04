@@ -255,7 +255,7 @@ public class MapGenerator : MonoBehaviour {
 				Enemy1.localScale = new Vector3(1.8f,1.8f,1.8f); 
 				Transform enemy1 = (Transform)Instantiate(Enemy1, CoordToPosition(enemyCoords.x, enemyCoords.y), Quaternion.Euler(Vector3.right*90)) as Transform;
 				found = true;
-				combatControllerScript.addEnemy(enemyCoords, "Nugget");
+				combatControllerScript.addEnemy(enemyCoords, enemy1.name, enemy1);
 				//Debug.Log("Enemy position is "+enemyCoords.x+" "+enemyCoords.y);
 			}
 		}

@@ -7,6 +7,9 @@ public class PlayerClass : MonoBehaviour {
 	GameObject combatController;
 	CombatControllerScript combatControllerScript;
 
+	GameObject enemy;
+	EnemyClass enemyScript;
+
 	string id = "0";
 	string name = "Boris";
 	string race = "Human";
@@ -93,6 +96,29 @@ public class PlayerClass : MonoBehaviour {
 		initiative = Random.Range(0,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
 		combatControllerScript.RecieveInitiative(name,initiative,true);
 		//Debug.Log(initiative);
+	}
+
+	public void MeleeAttack(EnemyClass _enemyScript) {
+		enemyScript = _enemyScript;
+		int toHitDice = Random.Range(1,20);
+		Debug.Log ((toHitDice + mAttack) + "to hit the goblin.");
+			if (toHitDice == 20) {
+				bool hit = enemyScript.toHit(toHitDice + mAttack);
+
+				if (hit) enemyScript.DealDamage((Random.Range(1,8) + strenghtMod)*2);
+				else enemyScript.DealDamage(Random.Range(1,8) + strenghtMod);
+			}
+
+			else if (toHitDice == 1) {
+				//FAIL
+			}
+
+			else {
+				bool hit = enemyScript.toHit(toHitDice + mAttack);
+
+				if (hit) enemyScript.DealDamage(Random.Range(1,8) + strenghtMod);
+			}
+		
 	}
 
 	private void calculateStats() {

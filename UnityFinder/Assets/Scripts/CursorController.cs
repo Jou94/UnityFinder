@@ -18,6 +18,9 @@ public class CursorController : MonoBehaviour {
 	GameObject player;
 	PlayerClass playerScript;
 
+	GameObject enemy;
+	EnemyClass enemyScript;
+
 	public enum GameState {Idle, PlayerMovement, PlayerAttack}
 	public GameState currentState;
 
@@ -26,9 +29,12 @@ public class CursorController : MonoBehaviour {
 	public int maxAttackRange;
 	public int attackRange = 0;
 
+	public string enemyName;
+
 	Vector2 mapSize;
 	Utility.Coord playerCoords;
 	Utility.Coord cursorCoords;
+	Utility.Coord enemyCoords;
 	Utility.Coord temporal;
 	Vector3 Hoffset = new Vector3 (1,0f,0f);
 	Vector3 Voffset = new Vector3 (0f,0f,1);
@@ -134,10 +140,10 @@ public class CursorController : MonoBehaviour {
 				temporal = cursorCoords;
 				if (!Cooldown){
 					
-					Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))));
-					Debug.Log(playerCoords.x + " " + playerCoords.y);
-					Debug.Log(temporal.x + " " + temporal.y);
-					Debug.Log(cursorCoords.x + " " + cursorCoords.y);
+					//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))));
+					//Debug.Log(playerCoords.x + " " + playerCoords.y);
+					//Debug.Log(temporal.x + " " + temporal.y);
+					//Debug.Log(cursorCoords.x + " " + cursorCoords.y);
 
 					if (Input.GetKey(KeyCode.A) && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(-1,0))) <= maxAttackRange) {
 						//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))));
@@ -169,6 +175,13 @@ public class CursorController : MonoBehaviour {
 
 				}
 
+				if (Input.GetKeyDown(KeyCode.Alpha2) && cursorCoords.Equals(enemyCoords)) {
+					Debug.Log("Attack: 1d8 + bab + strengthMod");
+					playerScript.MeleeAttack(enemyScript);
+					goBack();
+
+				}
+
 				if (Input.GetKey(KeyCode.Q)) goBack();
 
 				break;
@@ -192,12 +205,18 @@ public class CursorController : MonoBehaviour {
 		if (currentState == GameState.Idle) { 
 			currentState = GameState.PlayerAttack;
 			maxAttackRange = range/5;
-			Debug.Log(maxAttackRange);
+			//Debug.Log(maxAttackRange);
 		}
 	}
 
-	public void SetPlayerPosition(Utility.Coord _playerCoords) {
+	public void SetPlayerPosition(Utility.Coord _playerCoords, PlayerClass _playerScript) {
 		playerCoords = _playerCoords;
+		playerScript = _playerScript;
+	}
+
+	public void SetEnemyPosition(Utility.Coord _enemyCoords, EnemyClass _enemyScript) {
+		enemyCoords = _enemyCoords;
+		enemyScript = _enemyScript;
 	}
 
 	private void goBack() {

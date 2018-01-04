@@ -18,6 +18,11 @@ public class CombatControllerScript : MonoBehaviour {
 	Utility.Coord playerCoords;
 	Transform playerTransform;
 
+	GameObject enemy;
+	EnemyClass enemyScript;
+	Utility.Coord enemyCoords;
+	Transform enemyTransform;
+
 	GameObject cursor;
 	CursorController cursorScript;
 
@@ -26,8 +31,6 @@ public class CombatControllerScript : MonoBehaviour {
 	List<Utility.Ini> initiatives = new List<Utility.Ini>();
 
 	Utility.Coord cursorCoords;
-	
-	Utility.Coord enemyCoords;
 
 	Utility.Coord[] neighbours = {new Utility.Coord (0,1), new Utility.Coord (1,1), new Utility.Coord (1,0), new Utility.Coord (1,-1), new Utility.Coord (0,-1), new Utility.Coord (-1,-1), new Utility.Coord (-1,0), new Utility.Coord (-1,1)};
 
@@ -48,15 +51,16 @@ public class CombatControllerScript : MonoBehaviour {
 				int playerSpeed = playerScript.getSpeed();
 				//(showPlayerMovementArea(playerSpeed/5);
 				cursorScript.SetStatePlayerMovement(playerSpeed);
-				cursorScript.SetPlayerPosition(playerCoords);
+				cursorScript.SetPlayerPosition(playerCoords, playerScript);
 				//Debug.Log(playerName);	
 			}
 
 			else if (Input.GetKeyDown(KeyCode.Alpha2)) {
-				Debug.Log("TIME TO ATTACK, BOYS!");
+				//Debug.Log("TIME TO ATTACK, BOYS!");
 				int playerRange = playerScript.getRange();
 				cursorScript.SetStatePlayerAttack(playerRange);
-				cursorScript.SetPlayerPosition(playerCoords);	
+				cursorScript.SetPlayerPosition(playerCoords, playerScript);	
+				cursorScript.SetEnemyPosition(enemyCoords, enemyScript);
 			}	
 		}
 	}
@@ -86,9 +90,15 @@ public class CombatControllerScript : MonoBehaviour {
 		playerTransform = _playerTransform;
 	}
 
-	public void addEnemy (Utility.Coord _enemyCoords, string enemyName) {
+	public void addEnemy (Utility.Coord _enemyCoords, string enemyName, Transform _enemyTransform) {
 		enemyCoords = _enemyCoords;
 		combatantNumber++;
+
+		enemy = GameObject.Find(enemyName);
+		enemyScript = enemy.GetComponent<EnemyClass>();
+		enemyTransform = _enemyTransform;
+
+
 	}
 
 	public void RecieveInitiative (string name, int initiative, bool isPlayer) {
@@ -109,7 +119,7 @@ public class CombatControllerScript : MonoBehaviour {
 	public void movePlayer(Utility.Coord newPlayerCoords){
 		playerCoords = newPlayerCoords;
 		playerTransform.position = mapGeneratorScript.CoordToPosition(playerCoords.x, playerCoords.y);
-		cursorScript.SetPlayerPosition(playerCoords);
+		cursorScript.SetPlayerPosition(playerCoords, playerScript);
 	}
 
 	private void showPlayerMovementArea(int movementCells) {

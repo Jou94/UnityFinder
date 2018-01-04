@@ -76,6 +76,17 @@ public class EnemyClass : MonoBehaviour {
 		//Debug.Log(initiative);
 	}
 
+	public bool toHit(int hit) {
+		if (hit >= ac) return true;
+		return false;
+	}
+
+	public void DealDamage (int damage) {
+		Debug.Log ("Goblin has been dealt " + damage + " damage.");
+		hp -= damage;
+		if (hp <= 0) Destroy(gameObject);
+	}
+
 	private void calculateStats() {
 		strenghtMod = (int)Mathf.Floor((strenght - 10)/2);
 		dexterityMod = (int)Mathf.Floor((dexterity - 10)/2);
