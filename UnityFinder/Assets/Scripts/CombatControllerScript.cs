@@ -26,9 +26,14 @@ public class CombatControllerScript : MonoBehaviour {
 	GameObject cursor;
 	CursorController cursorScript;
 
+	GameObject camera;
+	CameraController cameraScript;
+
 	int combatantNumber = 0;
 	String[] turnOrder;
 	List<Utility.Ini> initiatives = new List<Utility.Ini>();
+	public int currentTurn = 0;
+	bool isPlayerTurn = true;
 
 	Utility.Coord cursorCoords;
 
@@ -40,28 +45,35 @@ public class CombatControllerScript : MonoBehaviour {
 		mapGeneratorScript = mapObject.GetComponent<MapGenerator>();
 		map = mapGeneratorScript.getMap();
 		mapSize = mapGeneratorScript.getMapSize();
+		camera = GameObject.Find("Main Camera");
+		cameraScript = camera.GetComponent<CameraController>();
+		
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		if (cursorCoords.Equals(playerCoords)) {
-			//Debug.Log("ON THE OBJECTIVE");
-			if (Input.GetKeyDown(KeyCode.Alpha1)) {
-				//Debug.Log("TIME TO MOVE, BOYS!");	
-				int playerSpeed = playerScript.getSpeed();
-				//(showPlayerMovementArea(playerSpeed/5);
-				cursorScript.SetStatePlayerMovement(playerSpeed);
-				cursorScript.SetPlayerPosition(playerCoords, playerScript);
-				//Debug.Log(playerName);	
-			}
+		CheckTurn();
 
-			else if (Input.GetKeyDown(KeyCode.Alpha2)) {
-				//Debug.Log("TIME TO ATTACK, BOYS!");
-				int playerRange = playerScript.getRange();
-				cursorScript.SetStatePlayerAttack(playerRange);
-				cursorScript.SetPlayerPosition(playerCoords, playerScript);	
-				cursorScript.SetEnemyPosition(enemyCoords, enemyScript);
-			}	
+		if (isPlayerTurn) { 
+			if (cursorCoords.Equals(playerCoords)) {
+				//Debug.Log("ON THE OBJECTIVE");
+				if (Input.GetKeyDown(KeyCode.Alpha1)) {
+					Debug.Log("TIME TO MOVE, BOYS!");	
+					int playerSpeed = playerScript.getSpeed();
+					//(showPlayerMovementArea(playerSpeed/5);
+					cursorScript.SetStatePlayerMovement(playerSpeed);
+					cursorScript.SetPlayerPosition(playerCoords, playerScript);
+					//Debug.Log(playerName);	
+				}
+
+				else if (Input.GetKeyDown(KeyCode.Alpha2)) {
+					Debug.Log("TIME TO ATTACK, BOYS!");
+					int playerRange = playerScript.getRange();
+					cursorScript.SetStatePlayerAttack(playerRange);
+					cursorScript.SetPlayerPosition(playerCoords, playerScript);	
+					cursorScript.SetEnemyPosition(enemyCoords, enemyScript);
+				}	
+			}
 		}
 	}
 
@@ -78,6 +90,8 @@ public class CombatControllerScript : MonoBehaviour {
 	}
 
 	public void setCursorCoords (Utility.Coord _cursorCoords) {cursorCoords = _cursorCoords;}
+
+	public void UpdateCursorStatus (CursorController _cursorScript) {cursorScript = _cursorScript;}
 
 	public Utility.Coord getCursorCoords() {return cursorCoords;}
 
@@ -102,9 +116,17 @@ public class CombatControllerScript : MonoBehaviour {
 	}
 
 	public void RecieveInitiative (string name, int initiative, bool isPlayer) {
+		//Debug.Log("token " + name + " with initiative = " + initiative + " and player = " + isPlayer);
 		Utility.Ini newInitiative = new Utility.Ini(name, initiative, isPlayer);
 		initiatives.Add(newInitiative);
-		//Debug.Log ("Initiative added " + name + " with a " + initiative);
+
+		initiatives.Sort((p1,p2)=>p1.initiative.CompareTo(p2.initiative));
+		initiatives.Reverse();
+
+		for (int i = 0; i < initiatives.Count; i++) {
+			Debug.Log ("initiative " + initiatives[i].name + " = " + initiatives[i].initiative);
+		}
+		
 	}
 
 	public void UpdateCursorCoords(int x, int y) {
@@ -120,6 +142,38 @@ public class CombatControllerScript : MonoBehaviour {
 		playerCoords = newPlayerCoords;
 		playerTransform.position = mapGeneratorScript.CoordToPosition(playerCoords.x, playerCoords.y);
 		cursorScript.SetPlayerPosition(playerCoords, playerScript);
+	}
+
+	public void EndTurn() {
+		//Debug.Log ("currentTurn = " + currentTurn + " count = " + (initiatives.Count-1));
+		if (currentTurn >= (initiatives.Count-1)) {
+			//Debug.Log ("currentTurn = " + currentTurn + " count = " + (initiatives.Count-1) + " RESET TO 0");
+			currentTurn = 0;
+		}
+		else {
+			//Debug.Log ("NEXT TURN ++");
+			currentTurn++;
+		}
+
+	}
+
+	private void CheckTurn(){
+		if (!initiatives[currentTurn].isPlayer && isPlayerTurn) {
+			Debug.Log ("DESTROY CURSOR");
+			isPlayerTurn = false;
+			cursorScript.Die();
+		}
+		else if (initiatives[currentTurn].isPlayer && !isPlayerTurn){
+			Debug.Log ("INSTANTIATE CURSOR");
+			isPlayerTurn = true;
+			mapGeneratorScript.InstantiateCursor(playerCoords.x, playerCoords.y); 
+			cameraScript.GoTo(playerCoords);
+
+		}
+		else if (!initiatives[currentTurn].isPlayer && !isPlayerTurn) {
+			cameraScript.GoTo(enemyCoords);
+			enemyScript.StartTurn();
+		}
 	}
 
 	private void showPlayerMovementArea(int movementCells) {

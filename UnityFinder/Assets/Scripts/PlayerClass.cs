@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class PlayerClass : MonoBehaviour {
 
+	private bool Cooldown = false;
+
 	GameObject combatController;
 	CombatControllerScript combatControllerScript;
 
@@ -93,7 +95,7 @@ public class PlayerClass : MonoBehaviour {
 	public int getRange(){return weaponRange;}
 
 	public void RollInitiative(){
-		initiative = Random.Range(0,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
+		initiative = Random.Range(1,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
 		combatControllerScript.RecieveInitiative(name,initiative,true);
 		//Debug.Log(initiative);
 	}
@@ -101,7 +103,7 @@ public class PlayerClass : MonoBehaviour {
 	public void MeleeAttack(EnemyClass _enemyScript) {
 		enemyScript = _enemyScript;
 		int toHitDice = Random.Range(1,20);
-		Debug.Log ((toHitDice + mAttack) + "to hit the goblin.");
+		Debug.Log ((toHitDice + mAttack) + " to hit the goblin.");
 			if (toHitDice == 20) {
 				bool hit = enemyScript.toHit(toHitDice + mAttack);
 
@@ -119,6 +121,10 @@ public class PlayerClass : MonoBehaviour {
 				if (hit) enemyScript.DealDamage(Random.Range(1,8) + strenghtMod);
 			}
 		
+	}
+
+	private void ResetCoodldown (){
+		Cooldown = false;
 	}
 
 	private void calculateStats() {

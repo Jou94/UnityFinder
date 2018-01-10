@@ -21,7 +21,9 @@ public class CursorController : MonoBehaviour {
 	GameObject enemy;
 	EnemyClass enemyScript;
 
-	public enum GameState {Idle, PlayerMovement, PlayerAttack}
+	CursorController cursorScript;
+
+	public enum GameState {Idle, PlayerMovement, PlayerAttack, StandBy}
 	public GameState currentState;
 
 	public int maxplayerDistance;
@@ -41,7 +43,7 @@ public class CursorController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
+		Debug.Log("START CURSOR");
 		map = GameObject.Find("Map");
 		mapGeneratorScript = map.GetComponent<MapGenerator>();
 		mapSize = mapGeneratorScript.getMapSize();
@@ -51,12 +53,19 @@ public class CursorController : MonoBehaviour {
 
 		cursorCoords = combatControllerScript.getCursorCoords();
 
+		//cursorScript = this.GetComponent<CursorController>();
+		//Debug.Log (cursorScript.currentState);
+
+		//CombatControllerScript.UpdateCursorStatus(cursorScript);
+
 		SetStateIdle();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		switch (currentState){
+			case GameState.StandBy:
+			break;
 			case GameState.Idle:
 				if (!Cooldown){
 					temporal = cursorCoords;
@@ -75,12 +84,18 @@ public class CursorController : MonoBehaviour {
 					Invoke("ResetCoodldown",0.10f);
 					Cooldown = true;
 				}
+				if (Input.GetKeyDown(KeyCode.Space)) {
+					SetStateStandBy();
+					//for(int i = 0; i <= 1000; i++) {Debug.Log(i);}
+					combatControllerScript.EndTurn();	
+				}
 				break;
 
 			case GameState.PlayerMovement:
 			//Debug.Log(position.x + " " + position.y);
 				temporal = cursorCoords;
 				if (!Cooldown){
+					//Debug.Log("PlayerMovement");
 					//Debug.Log(playerCoords.Difference(cursorCoords.Add(new Utility.Coord(-1,0))));
 					//Debug.Log(playerCoords.x + " " + playerCoords.y);
 					//Debug.Log(temporal.x + " " + temporal.y);
@@ -95,7 +110,7 @@ public class CursorController : MonoBehaviour {
 						CursorMove("Left");
 						Invoke("ResetCoodldown",0.10f);
 						Cooldown = true;
-						
+					
 					}
 
 					else if (Input.GetKey(KeyCode.W) && (mapGeneratorScript.getTile(cursorCoords.Add(new Utility.Coord(0,1)))).getType() !=2 && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(0,1))) <= maxplayerDistance) {
@@ -133,12 +148,16 @@ public class CursorController : MonoBehaviour {
 				}
 
 				if (Input.GetKey(KeyCode.Q)) goBack();
-
+				if (Input.GetKey(KeyCode.Space)) {
+					SetStateStandBy();
+					combatControllerScript.EndTurn();
+				}
 				break;
 
 			case GameState.PlayerAttack:
 				temporal = cursorCoords;
 				if (!Cooldown){
+					//Debug.Log("PlayerAttack");
 					
 					//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(-1,0))));
 					//Debug.Log(playerCoords.x + " " + playerCoords.y);
@@ -153,7 +172,7 @@ public class CursorController : MonoBehaviour {
 					}
 
 					else if (Input.GetKey(KeyCode.W)  && playerCoords.Difference(cursorCoords.Add(new Utility.Coord(0,1))) <= maxAttackRange) {
-						Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(0,1))));
+						//Debug.Log(playerCoords.Difference(temporal.Add(new Utility.Coord(0,1))));
 						CursorMove("Up");
 						Invoke("ResetCoodldown",0.10f);
 						Cooldown = true;
@@ -176,14 +195,17 @@ public class CursorController : MonoBehaviour {
 				}
 
 				if (Input.GetKeyDown(KeyCode.Alpha2) && cursorCoords.Equals(enemyCoords)) {
-					Debug.Log("Attack: 1d8 + bab + strengthMod");
+					Debug.Log("Attack: 1d20 + bab + strengthMod");
 					playerScript.MeleeAttack(enemyScript);
 					goBack();
 
 				}
 
 				if (Input.GetKey(KeyCode.Q)) goBack();
-
+				if (Input.GetKey(KeyCode.Space)) {
+					SetStateStandBy();
+					combatControllerScript.EndTurn();
+				}
 				break;
 		}
 		
@@ -191,6 +213,10 @@ public class CursorController : MonoBehaviour {
 
 	public void SetStateIdle() {
 		currentState = GameState.Idle;
+	}
+
+	public void SetStateStandBy() {
+		currentState = GameState.StandBy;
 	}
 
 	public void SetStatePlayerMovement(int movement) {
@@ -218,6 +244,8 @@ public class CursorController : MonoBehaviour {
 		enemyCoords = _enemyCoords;
 		enemyScript = _enemyScript;
 	}
+
+	public void Die () {Destroy(gameObject);}
 
 	private void goBack() {
 		playerDistance = 0;

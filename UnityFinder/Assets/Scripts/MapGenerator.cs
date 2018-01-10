@@ -51,7 +51,7 @@ public class MapGenerator : MonoBehaviour {
 		GenerateMap();
 		InstantiatePlayers();
 		InstantiateEnemies();
-		InstantiateCursor();
+		InstantiateCursor((int)mapSize.x/2,(int)mapSize.y/2);
 
 		cursor = GameObject.Find("Cursor(Clone)");
 		cursorScript = cursor.GetComponent<CursorController>();
@@ -88,6 +88,8 @@ public class MapGenerator : MonoBehaviour {
 		shuffledTileCoords.Enqueue (randomCoord);
 		return randomCoord;
 	}
+
+	public void UpdateCursorStatus (CursorController _cursorScript) {cursorScript = _cursorScript;}
 
 	private void GenerateMap() {
 
@@ -261,10 +263,17 @@ public class MapGenerator : MonoBehaviour {
 		}
 	}
 
-	private void InstantiateCursor() {
-		cursorCoords = new Utility.Coord ((int)mapSize.x/2, (int)mapSize.y/2);
-		Transform cursor = (Transform)Instantiate(Cursor, new Vector3 (CoordXToPosition((int)mapSize.x/2),0.05f,CoordYToPosition((int)mapSize.y/2)), Quaternion.Euler(Vector3.right*90)) as Transform;
+	public void InstantiateCursor(int x, int y) {
+		cursorCoords = new Utility.Coord (x, y);
+		Transform cursorT
+		 = (Transform)Instantiate(Cursor, new Vector3 (CoordXToPosition(x),0.05f,CoordYToPosition(y)), Quaternion.Euler(Vector3.right*90)) as Transform;
 		combatControllerScript.setCursorCoords(cursorCoords);
 		//Debug.Log("Cursor position is "+cursorCoords.x+" "+cursorCoords.y);
+
+		cursor = GameObject.Find("Cursor(Clone)");
+		cursorScript = cursor.GetComponent<CursorController>();
+
+		combatControllerScript.setCursor(cursor, cursorScript);
+
 	}
 }

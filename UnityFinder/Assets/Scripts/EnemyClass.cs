@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class EnemyClass : MonoBehaviour {
 
+	private bool Cooldown = false;
+	private bool isTurn = false; 
+
 	GameObject combatController;
 	CombatControllerScript combatControllerScript;
 
@@ -67,12 +70,18 @@ public class EnemyClass : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-		
+		Debug.Log (isTurn);
+		Debug.Log (Cooldown);
+		if (isTurn){
+			if (!Cooldown) {
+				
+			}
+		}
 	}
 
 	public void RollInitiative(){
-		initiative = Random.Range(0,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
-		combatControllerScript.RecieveInitiative(name,initiative,true);
+		initiative = Random.Range(1,20) + dexterityMod; //TODO: Add more bonus to initiative roll (feats + misc)
+		combatControllerScript.RecieveInitiative(name,initiative,false);
 		//Debug.Log(initiative);
 	}
 
@@ -84,7 +93,23 @@ public class EnemyClass : MonoBehaviour {
 	public void DealDamage (int damage) {
 		Debug.Log ("Goblin has been dealt " + damage + " damage.");
 		hp -= damage;
-		if (hp <= 0) Destroy(gameObject);
+		if (hp <= 0) Die();
+	}
+
+	public void Die () {
+		Destroy(gameObject);
+		Application.LoadLevel(Application.loadedLevel);
+	}
+
+	public void StartTurn(){
+		isTurn = true;
+		combatControllerScript.EndTurn();
+		//Invoke("ResetCooldown",2.0f);
+		Cooldown = true;
+	}
+
+	private void ResetCooldown(){
+		Cooldown = false;
 	}
 
 	private void calculateStats() {
@@ -95,8 +120,8 @@ public class EnemyClass : MonoBehaviour {
 		wisdomMod = (int)Mathf.Floor((wisdom - 10)/2);
 		charismaMod = (int)Mathf.Floor((charisma - 10)/2);
 		hp = 10 + constitutionMod;
-		mAttack = bab + strenghtMod + 1;
-		rAttack = bab + dexterityMod + 1;
+		mAttack = bab + strenghtMod + size;
+		rAttack = bab + dexterityMod + size;
 		ac = 10 + armourBonus + dexterityMod + dodgeBonus + deflectionBonus + natArmourBonus + shieldBonus + size;
 	}
 }
